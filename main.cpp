@@ -4,6 +4,7 @@
 #include <iomanip>
 #include "graph.hpp"
 #include "station.hpp"
+
 #define SIZE 200
 using namespace std;
 station stationlist[SIZE];
@@ -71,9 +72,9 @@ int main(int argc, char **argv)
 
     int choice = 0;
     //print menu options
-    cout << "============================================================" << endl;
+    cout << "===========================================================" << endl;
     cout << "Reading Railways Scheduler" << endl;
-    cout << "============================================================" << endl;
+    cout << "===========================================================" << endl;
     cout << "Options: Enter the number of your selected option" << endl;
     cout << "(1) - Print full schedule" << endl;
     cout << "(2) - Print station schedule" << endl;
@@ -133,7 +134,14 @@ int main(int argc, char **argv)
         }
         else if (choice == 5)
         {
-
+            int src, dst;
+            cout << "Enter departing station: ";
+            cin >> src;
+            cout << endl;
+            cout << "Enter destination station: ";
+            cin >> dst;
+            cout << endl;
+            adjacency_matrix.service_available(src, dst, station_counter);
         }
         else if (choice == 6)
         {
@@ -156,7 +164,14 @@ int main(int argc, char **argv)
         }
         else if (choice == 7)
         {
-
+            int src, dst;
+            cout << "Enter departing station: ";
+            cin >> src;
+            cout << endl;
+            cout << "Enter destination station: ";
+            cin >> dst;
+            cout << endl;
+            adjacency_matrix.dijikstra(src, dst, station_counter);
         }
         else if (choice == 8)
         {
