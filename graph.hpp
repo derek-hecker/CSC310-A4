@@ -10,9 +10,9 @@ using namespace std;
 #define INF 9999999
 struct times
 {
-	int key;		   // 1 or zero value based on if there is an edge
-	int dpt_time;	  //departure time
-	int arvl_time;	 //arrival time
+	int key;		  // 1 or zero value based on if there is an edge
+	int dpt_time;	 //departure time
+	int arvl_time;	//arrival time
 	float delta_time; //time on train
 };
 
@@ -27,6 +27,7 @@ public:
 	void service_available(int src_id, int dst_id, int station_count);
 	bool empty(vector<bool> set);
 	void dijikstra(int src, int dest, int station_count);
+	void dijikstra_with_layover(int src, int dest, int station_count);
 
 private:
 	times matrix[SIZE][SIZE];
@@ -34,15 +35,6 @@ private:
 
 graph::graph()
 {
-	//create an array of integer pointers, this takes care of
-	//the first pointer in our double pointer
-	//matrix = new int*[SIZE];
-	//for each index in that array create an array of plain
-	//integers, not pointers to integers
-	//for(int i=0;i<SIZE;i++)
-	//	matrix[i] = new int[SIZE];
-
-	//initialize all of the elements in our matrix to 0
 	for (int i = 0; i < SIZE; i++)
 	{
 		for (int x = 0; x < SIZE; x++)
@@ -61,7 +53,7 @@ void graph::add(int src, int dst, int dpt_time, int arvl_time)
 	matrix[src][dst].dpt_time = dpt_time;
 	matrix[src][dst].arvl_time = arvl_time;
 	float time1 = dpt_time;
-	float time2 =  arvl_time;
+	float time2 = arvl_time;
 	float minutes1, minutes2, hour1, hour2;
 	minutes1 = fmod(time1, 100);
 	minutes2 = fmod(time2, 100);
@@ -153,7 +145,7 @@ void graph::service_available(int src, int dest, int station_count)
 			{
 				if ((distances[minNode] != INF && distances[minNode] + matrix[minNode][vert].delta_time) < distances[vert])
 				{
-					
+
 					distances[vert] = distances[minNode] + matrix[minNode][vert].delta_time;
 				}
 			}
@@ -168,7 +160,6 @@ void graph::service_available(int src, int dest, int station_count)
 		cout << "Service is available from station " << src << " to station " << dest << endl;
 	}
 }
-
 
 bool graph::empty(vector<bool> set)
 {
@@ -216,18 +207,91 @@ void graph::dijikstra(int src, int dest, int station_count)
 			{
 				if ((distances[minNode] != INF && distances[minNode] + matrix[minNode][vert].delta_time) < distances[vert])
 				{
-					//if (matrix[minNode][vert].dpt_time > matrix[vert][minNode].arvl_time)
-					distances[vert] = distances[minNode] + matrix[minNode][vert].delta_time;
+						//cout << matrix[minNode][vert].dpt_time << ' ' << matrix[minNode][vert].arvl_time << endl;
+						//cout << minNode << " " << vert   << " " << matrix[minNode][vert].dpt_time << ' ' << matrix[minNode][vert].arvl_time << ' ' << distances[vert] << ' '<< distances[minNode] << ' '<< matrix[minNode][vert].delta_time << ' ' << endl;
+						distances[vert] = distances[minNode] + matrix[minNode][vert].delta_time;
 				}
 			}
 		}
 	}
+	/*for (int i = 0; i <= station_count; i++){
+		cout << i << " " << distances[i] << endl;
+	}*/
 	if (distances[dest] == INF)
 	{
 		cout << "There is no available route from station " << src << " to station " << dest << endl;
 	}
 	else
 	{
-		cout << "Distance from station " << src << " to station " << dest << " is " << distances[dest] * 100 << endl;
+		if (fmod(distances[dest]*100, 100) >= 60)
+		{
+			distances[dest] = distances[dest] * 100 + 40;
+		} else{
+			distances[dest] = distances[dest] * 100;
+		}
+		cout << "Distance from station " << src << " to station " << dest << " is " << distances[dest] << endl;
+	}
+}
+void graph::dijikstra_with_layover(int src, int dest, int station_count)
+{
+	vector<bool> vertexSet;
+	float distances[station_count];
+	int minNode;
+	int minDistance;
+
+	for (int i = 0; i <= station_count; i++)
+	{
+		distances[i] = INF;
+		vertexSet.push_back(false);
+	}
+
+	distances[src] = 0;
+	int leave_time = 0;
+	int last_arvl_time = 0;
+	int last_dpt_time = 0;
+
+	while (!empty(vertexSet))
+	{
+		minNode = INF;
+		minDistance = INF;
+		for (int vert = 0; vert <= station_count; vert++)
+		{
+			if (vertexSet[vert] == false && distances[vert] <= minDistance)
+			{
+				minDistance = distances[vert];
+				minNode = vert;
+			}
+		}
+		vertexSet[minNode] = true;
+		for (int vert = 0; vert <= station_count; vert++)
+		{
+			if (vertexSet[vert] == false && matrix[minNode][vert].key == 1)
+			{
+				if ((distances[minNode] != INF && distances[minNode] + matrix[minNode][vert].delta_time + ((matrix[minNode][vert].dpt_time - last_arvl_time) < distances[vert])/100))
+				{
+						cout << matrix[minNode][vert].dpt_time << endl;
+						distances[vert] = distances[minNode] + ((matrix[minNode][vert].dpt_time - last_arvl_time)/100);
+						last_arvl_time = matrix[minNode][vert].arvl_time;
+						last_dpt_time = matrix[minNode][vert].dpt_time;
+				}
+			}
+		}
+	}
+	/*for (int i = 0; i <= station_count; i++){ + ((matrix[minNode][vert].dpt_time - leave_time))  matrix[minNode][vert].delta_time +
+		cout << i << " " << distances[i] << endl;
+	}*/
+	if (distances[dest] == INF)
+	{
+		cout << "There is no available route from station " << src << " to station " << dest << endl;
+	}
+	else
+	{
+		if (fmod(distances[dest]*100, 100) >= 60)
+		{
+			distances[dest] = distances[dest] * 100 + 40;
+		} else{
+			distances[dest] = distances[dest] * 100;
+		}
+		cout << "Distance from station " << src << " to station " << dest << " is " << distances[dest] << endl;
 	}
 }

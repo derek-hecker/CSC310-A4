@@ -4,27 +4,30 @@
 #include <iomanip>
 #include "graph.hpp"
 #include "station.hpp"
-
 #define SIZE 200
 using namespace std;
 station stationlist[SIZE];
 graph adjacency_matrix;
 
-
 string lookup_station_by_id(int id, int number)
 {
     string name;
-    for (int i = i; i <= number ; i++){
-        if (stationlist[i].station_id == id){
+    for (int i = i; i <= number; i++)
+    {
+        if (stationlist[i].station_id == id)
+        {
             return stationlist[i].station_name;
         }
     }
     return "\0";
 }
-int lookup_station_by_name(string st_name, int number){
+int lookup_station_by_name(string st_name, int number)
+{
     int id = 0;
-    for (int i = 0; i <= number; i++){
-        if (stationlist[i].station_name == st_name){
+    for (int i = 0; i <= number; i++)
+    {
+        if (stationlist[i].station_name == st_name)
+        {
             return stationlist[i].station_id;
         }
     }
@@ -63,7 +66,8 @@ int main(int argc, char **argv)
     }
     input.close();
     input.open(argv[2]);
-    while (input >> src_station){
+    while (input >> src_station)
+    {
         input >> dst_station;
         input >> dpt_time;
         input >> arvl_time;
@@ -84,8 +88,9 @@ int main(int argc, char **argv)
     cout << "(6) - Nonstop service available" << endl;
     cout << "(7) - Find route (Shortest riding time)" << endl;
     cout << "(8) - Find route (Shortest overall travel time)" << endl;
-    cout << "(9) - Exit" << endl;
-    while (choice != 9)
+    cout << "(9) - Find route, specifying start time" << endl;
+    cout << "(10) - Exit" << endl;
+    while (choice != 10)
     {
         //Menu Loop
         cout << "Enter Option: ";
@@ -94,7 +99,7 @@ int main(int argc, char **argv)
         //Program Driver if branches
         if (choice == 1)
         {
-           adjacency_matrix.print_all(station_counter);
+            adjacency_matrix.print_all(station_counter);
         }
         else if (choice == 2)
         {
@@ -102,7 +107,6 @@ int main(int argc, char **argv)
             cout << "Enter the id of the station you would like to see the schedule of: ";
             cin >> stid;
             adjacency_matrix.print_station_schedule(stid);
-
         }
         else if (choice == 3)
         {
@@ -112,9 +116,12 @@ int main(int argc, char **argv)
             cout << endl;
             int searched_id = 0;
             searched_id = lookup_station_by_name(searching_name, station_counter);
-            if (searched_id == 0){
+            if (searched_id == 0)
+            {
                 cout << "Station does not exist";
-            } else {
+            }
+            else
+            {
                 cout << "The station id for " << searching_name << " is " << searched_id << endl;
             }
         }
@@ -126,9 +133,12 @@ int main(int argc, char **argv)
             cout << endl;
             string searched_name;
             searched_name = lookup_station_by_id(id, station_counter);
-            if (searched_name == "\0"){
+            if (searched_name == "\0")
+            {
                 cout << "Station does not exist" << endl;
-            } else {
+            }
+            else
+            {
                 cout << "The station name for id=" << id << " is " << searched_name << endl;
             }
         }
@@ -156,9 +166,12 @@ int main(int argc, char **argv)
             non_stop_service = adjacency_matrix.non_stop_service_available(src, dst);
             string station1 = lookup_station_by_id(src, station_counter);
             string station2 = lookup_station_by_id(dst, station_counter);
-            if (non_stop_service){
-                cout << "Non-stop Service is available from " << station1  << " to " << station2  << endl;
-            } else {
+            if (non_stop_service)
+            {
+                cout << "Non-stop Service is available from " << station1 << " to " << station2 << endl;
+            }
+            else
+            {
                 cout << "Service is not available or incorrect station ids were entered" << endl;
             }
         }
@@ -167,25 +180,41 @@ int main(int argc, char **argv)
             int src, dst;
             cout << "Enter departing station: ";
             cin >> src;
-            cout << endl;
             cout << "Enter destination station: ";
             cin >> dst;
-            cout << endl;
             adjacency_matrix.dijikstra(src, dst, station_counter);
         }
         else if (choice == 8)
         {
+            int src, dst;
+            cout << "Enter departing station: ";
+            cin >> src;
+            cout << "Enter destination station: ";
+            cin >> dst;
+            adjacency_matrix.dijikstra_with_layover(src, dst, station_counter);
         }
         else if (choice == 9)
+        {
+            //flip the key bit to 0 on all times that start after the desired leave time if you ever figure out layovers
+            graph adjacency_matrix_copy = adjacency_matrix;
+            int src, dst, dpt_time;
+            cout << "Enter departing station: ";
+            cin >> src;
+            cout << "Enter destination station: ";
+            cin >> dst;
+            cout << "Enter departure time: ";
+            cin >> dpt_time;
+
+        }
+        else if (choice == 10)
         {
             exit;
         }
         else
         {
-            cout << "Option entered is invalid, please enter a number between 1 and 9" << endl;
+            cout << "Option entered is invalid, please enter a number between 1 and 10" << endl;
             continue;
         }
-    
     }
     return 0;
 }
